@@ -3,14 +3,15 @@ import { WebSocket } from "ws";
 import { WebSocketManager } from "./WebSocketManager";
 
 export class SocketConnection {
-  ip: string;
   constructor(
     public webSocketManager: WebSocketManager,
     public socket: WebSocket,
     public req: IncomingMessage,
     public id: string
-  ) {
-    this.ip = req.socket.remoteAddress || "0.0.0.0";
+  ) {}
+
+  get ip() {
+    return this.req.socket.remoteAddress;
   }
 
   async init() {
