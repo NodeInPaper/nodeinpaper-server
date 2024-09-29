@@ -1,5 +1,5 @@
 import { IncomingMessage } from "http";
-import { RawData, WebSocket } from "ws";
+import { WebSocket } from "ws";
 import { WebSocketManager } from "./WebSocketManager";
 
 export class SocketConnection {
