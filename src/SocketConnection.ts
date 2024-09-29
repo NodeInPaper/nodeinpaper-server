@@ -24,6 +24,7 @@ export class SocketConnection {
 
   async destroy() {
     this.socket.off("message", this.onMessage);
+    this.socket.off("close", this.destroy);
     this.socket.close();
     this.webSocketManager.connections.delete(this.id);
   }
