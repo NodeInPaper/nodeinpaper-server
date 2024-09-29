@@ -1,2 +1,2 @@
-# nodeinpaper-client
- Node in Paper client.
+# nodeinpaper-server
+ Node in Paper server.
