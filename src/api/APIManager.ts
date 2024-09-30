@@ -7,7 +7,7 @@ export interface ExecuteResponse {
   data: any;
 }
 
-export type RefType = { $type: "Reference", id: string, value: any, container?: string };
+export type RefType = { $type: "Reference", id: string, value: any };
 
 export function singularExecute(connection: SocketConnection, path: InfiniteProxyPathKey[], isSync: boolean) {
   return new Promise(async (resolve, reject) => {
