@@ -20,30 +20,30 @@ export function singularExecute(connection: SocketConnection, path: InfiniteProx
   });
 }
 
+export function buildSingularAPI(connection: SocketConnection, startPath: InfiniteProxyPathKey[] = []) {
+  return createInfinitePathProxy((path, ...args) => {
+    const lastKey = path.at(-1);
+
+    switch (lastKey?.key) {
+      case "$execute":
+      case "$exec": {
+        if (typeof lastKey.args![0]?.sync === "boolean") {
+          return singularExecute(connection, path, !!lastKey.args![0]?.sync);
+        }
+        return singularExecute(connection, path, false);
+      }
+    }
+
+    return ContinueToInfinitePath;
+  }, startPath)
+}
+
 export class APIManager {
   constructor(public nip: NIPServer) { }
 
   async buildAPI(connection: SocketConnection) {
     return {
-      singular: createInfinitePathProxy((path, ...args) => {
-        const lastKey = path.at(-1);
-
-        switch (lastKey?.key) {
-          case "$execute":
-          case "$exec": {
-            if (typeof lastKey.args![0]?.sync === "boolean") {
-              return singularExecute(connection, path, !!lastKey.args![0]?.sync);
-            }
-            return singularExecute(connection, path, false);
-          }
-          case "$executeSync":
-          case "$execSync": {
-            return singularExecute(connection, path, true);
-          }
-        }
-
-        return ContinueToInfinitePath;
-      })
+      singular: buildSingularAPI(connection)
     }
   }
 }
