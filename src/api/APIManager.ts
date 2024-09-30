@@ -24,7 +24,9 @@ export function buildSingularAPI(connection: SocketConnection, startPath: Infini
   return createInfinitePathProxy((path, ...args) => {
     const lastKey = path.at(-1);
 
-    switch (lastKey?.key) {
+    if (lastKey?.type !== "Apply") return ContinueToInfinitePath;
+
+    switch (lastKey.key) {
       case "$execute":
       case "$exec": {
         if (typeof lastKey.args![0]?.sync === "boolean") {
