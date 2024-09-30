@@ -14,15 +14,15 @@ export class WebSocketManager {
       port: this.nip.config.port,
       host: this.nip.config.host,
     });
-    this.wss.on("connection", this.onConnection);
+    this.wss.on("connection", this.handleConnection);
   }
 
   async destroy() {
-    this.wss.off("connection", this.onConnection);
+    this.wss.off("connection", this.handleConnection);
     this.wss.close();
   }
 
-  async onConnection(socket: WebSocket, req: IncomingMessage) {
+  async handleConnection(socket: WebSocket, req: IncomingMessage) {
     const id = crypto.randomUUID();
     const connection = new SocketConnection(this, socket, req, id);
     await connection.init();
