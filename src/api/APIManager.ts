@@ -29,26 +29,32 @@ export function singularExecute({
       response: responseMap,
       base
     })) as ExecuteResponse;
-    if (!res) return resolve([true, "Not connected to server"]);
+    if (!res) return resolve([false, "Not connected to server"]);
 
     if (!res.ok) return resolve([res.ok, res.data]);
     if (!res.data) return resolve([res.ok, null]);
 
-    let value = responseMap.length ? Object.fromEntries(res.data.map((i: any) => [i.key, i.value])) : res.data;
-
-    if (value?.__type__ === "Reference" && value.id) {
-      value = buildSingularAPI({
-        connection,
-        base: value.id,
-        hardCodedValues: {
-          $refId: value.id
-        }
-      });
+    if (res.data?.__type__ === "Reference" && res.data.id) {
+      return resolve(
+        [
+          true,
+          buildSingularAPI({
+            connection,
+            base: res.data.id,
+            hardCodedValues: {
+              $refId: res.data.id,
+              $unRef: () => {
+                connection.send("RemoveReference", res.data.id);
+              }
+            }
+          })
+        ]
+      )
     }
 
     resolve([
       res.ok,
-      value
+      responseMap.length ? Object.fromEntries(res.data.map((i: any) => [i.key, i.value])) : res.data
     ]);
   });
 }
@@ -141,20 +147,21 @@ export class APIManager {
       plugin: buildSingularAPI({
         connection,
       }),
-      async ref(ref: RefType) {
+      async ref(id: string) {
         return buildSingularAPI({
           connection,
-          base: ref.id
+          base: id
         });
       },
-      async removeRef(ref: RefType) {
-        return await connection.sendAndWaitResponse("RemoveReference", ref.id);
+      async unRef(id: string) {
+        connection.send("RemoveReference", id);
       },
-      async accessRef(ref: RefType, pathCb: (v: any) => any = (v) => v) {
-        return await connection.sendAndWaitResponse("AccessReference", {
-          id: ref.id,
+      async accessRef(id: string, pathCb: (v: any) => any = (v) => v) {
+        const res = await connection.sendAndWaitResponse("AccessReference", {
+          id,
           path: pathCb(createInfinitePathProxy(() => ContinueToInfinitePath, []))[CurrentInfinitePath]
-        });
+        }) as any;
+        return [res.ok, res.data];
       }
     }
   }

@@ -5,16 +5,20 @@ const nip = createNIPServer({
   host: "0.0.0.0",
 });
 
-nip.register(async ({ api: { plugin } }) => {
+nip.register(async ({ api: { plugin }, onDestroy }) => {
   console.log("Registered!");
-  setInterval(async () => {
+  let interval = setInterval(async () => {
     try {
-      await plugin
+      const [, player] = await plugin
         .getServer()
         .getPlayer("TheArmagan")
-        .sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`)
         .$exec();
-      const [isGetOK, getRes] = await plugin.getServer().getPlayer("TheArmagan").$get(
+
+      console.log({ player });
+
+      player.sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
+
+      const [isGetOK, getRes] = await player.$get(
         {
           uuid: (p: any) => p.getUniqueId().toString(),
           x: (p: any) => p.getLocation().getX(),
@@ -24,13 +28,20 @@ nip.register(async ({ api: { plugin } }) => {
       );
 
       console.log({
+        date: new Date().toLocaleString(),
         isGetOK,
         getRes,
       });
+
+      player.$unRef();
     } catch (e) {
       console.error(e);
     }
   }, 1000);
+
+  onDestroy(() => {
+    clearInterval(interval);
+  });
 });
 
 nip.init();

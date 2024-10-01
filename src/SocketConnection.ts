@@ -2,6 +2,8 @@ import { IncomingMessage } from "http";
 import { WebSocket } from "ws";
 import { WebSocketManager } from "./WebSocketManager";
 
+import util from "util";
+
 export class SocketConnection {
   private pendingResponses: Map<string, (data: any) => void> = new Map();
   private onDestroys: (() => void)[] = [];
@@ -17,17 +19,17 @@ export class SocketConnection {
   }
 
   async init() {
+    const self = this;
+
     this.socket.on("message", this.handleMessage.bind(this));
     this.socket.on("close", this.destroy.bind(this));
-
-    await new Promise(r => setTimeout(r, 10));
 
     this.webSocketManager.nip.registrars.forEach(async (registrar) => {
       registrar({
         api: await this.webSocketManager.nip.apiManager.buildAPI(this),
         connection: this,
         onDestroy(cb: () => void) {
-          this.onDestroys.push(cb);
+          self.onDestroys.push(cb);
         }
       });
     });
@@ -59,6 +61,7 @@ export class SocketConnection {
 
   async sendAndWaitResponse(event: string, data: any) {
     if (this.socket.readyState !== WebSocket.OPEN) return;
+    console.log("Sending", event, util.inspect(data, { depth: 10, colors: true }));
     return new Promise((resolve) => {
       const responseId = crypto.randomUUID();
       this.pendingResponses.set(responseId, resolve);
