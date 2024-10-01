@@ -2,8 +2,6 @@ import { NIPServer } from "@src/NIPServer";
 import { SocketConnection } from "@src/SocketConnection";
 import { ContinueToInfinitePath, createInfinitePathProxy, CurrentInfinitePath, InfiniteProxyPathKey } from "./infiniteProxy";
 
-import util from "util";
-
 export interface ExecuteResponse {
   ok: boolean;
   data: any;
@@ -22,7 +20,7 @@ export function singularExecute(connection: SocketConnection, path: InfiniteProx
 
     if (!res.ok) return resolve([res.ok, res.data]);
     if (!res.data) return resolve([res.ok, null]);
-    
+
     resolve([
       res.ok,
       responseMap.length ? Object.fromEntries(res.data.map((i: any) => [i.key, i.value])) : res.data
@@ -54,6 +52,14 @@ export function buildSingularAPI(connection: SocketConnection, startPath: Infini
           return singularExecute(connection, path.slice(0, -1), sync, buildResponseMap(response));
         }
         return singularExecute(connection, path.slice(0, -1), false);
+      }
+      case "$executeSync":
+      case "$execSync": {
+        if (typeof lastKey.args![0] === "object") {
+          const { response = [] } = lastKey.args![0];
+          return singularExecute(connection, path.slice(0, -1), true, buildResponseMap(response));
+        }
+        return singularExecute(connection, path.slice(0, -1), true);
       }
       case "$get": {
         return singularExecute(connection, path.slice(0, -1), true, buildResponseMap(Array.isArray(lastKey.args![0]) ? lastKey.args![0] : []));
