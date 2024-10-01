@@ -22,6 +22,7 @@ export function singularExecute(connection: SocketConnection, path: InfiniteProx
 
     if (!res.ok) return resolve([res.ok, res.data]);
     if (!res.data) return resolve([res.ok, null]);
+    
     resolve([
       res.ok,
       responseMap.length ? Object.fromEntries(res.data.map((i: any) => [i.key, i.value])) : res.data
