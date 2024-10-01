@@ -3,10 +3,11 @@ export const CurrentInfinitePath = Symbol("CurrentInfinitePath");
 
 export type InfiniteProxyPathKey = { key: string, type: "Get" | "Apply", args?: any[] };
 
-export function createInfinitePathProxy(onApplyPath: (path: InfiniteProxyPathKey[], ...args: any[]) => any, path: InfiniteProxyPathKey[] = []): any {
+export function createInfinitePathProxy(onApplyPath: (path: InfiniteProxyPathKey[], ...args: any[]) => any, path: InfiniteProxyPathKey[] = [], hardcodedValues?: Record<string, any>): any {
   return new Proxy(() => { }, {
     get(target, key) {
       if (key === CurrentInfinitePath) return path;
+      if (hardcodedValues && key in hardcodedValues) return hardcodedValues[key as string];
       return createInfinitePathProxy(onApplyPath, [...path, {
         key: key.toString(),
         type: "Get"

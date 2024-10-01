@@ -4,6 +4,7 @@ import { WebSocketManager } from "./WebSocketManager";
 
 export class SocketConnection {
   private pendingResponses: Map<string, (data: any) => void> = new Map();
+  private onDestroys: (() => void)[] = [];
   constructor(
     public webSocketManager: WebSocketManager,
     public socket: WebSocket,
@@ -25,6 +26,9 @@ export class SocketConnection {
       registrar({
         api: await this.webSocketManager.nip.apiManager.buildAPI(this),
         connection: this,
+        onDestroy(cb: () => void) {
+          this.onDestroys.push(cb);
+        }
       });
     });
   }
@@ -34,6 +38,8 @@ export class SocketConnection {
     this.socket.off("close", this.destroy);
     this.socket.close();
     this.webSocketManager.connections.delete(this.id);
+    this.onDestroys.forEach((cb) => cb());
+    this.onDestroys.length = 0;
   }
 
   async handleMessage(data: string) {

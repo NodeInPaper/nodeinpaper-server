@@ -5,33 +5,23 @@ const nip = createNIPServer({
   host: "0.0.0.0",
 });
 
-nip.register(async ({ api: { singular } }) => {
+nip.register(async ({ api: { plugin } }) => {
   console.log("Registered!");
   setInterval(async () => {
     try {
-      await singular
+      await plugin
         .getServer()
         .getPlayer("TheArmagan")
         .sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`)
         .$exec();
-      const [isGetOK, getRes] = await singular.getServer().getPlayer("TheArmagan").$get([
-        [
-          "uuid",
-          (p: any) => p.getUniqueId().toString(),
-        ],
-        [
-          "x",
-          (p: any) => p.getLocation().getX(),
-        ],
-        [
-          "y",
-          (p: any) => p.getLocation().getY(),
-        ],
-        [
-          "z",
-          (p: any) => p.getLocation().getZ(),
-        ],
-      ]);
+      const [isGetOK, getRes] = await plugin.getServer().getPlayer("TheArmagan").$get(
+        {
+          uuid: (p: any) => p.getUniqueId().toString(),
+          x: (p: any) => p.getLocation().getX(),
+          y: (p: any) => p.getLocation().getY(),
+          z: (p: any) => p.getLocation().getZ(),
+        }
+      );
 
       console.log({
         isGetOK,
