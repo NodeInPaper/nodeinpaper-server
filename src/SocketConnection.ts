@@ -16,8 +16,17 @@ export class SocketConnection {
   }
 
   async init() {
-    this.socket.on("message", this.handleMessage);
-    this.socket.on("close", this.destroy);
+    this.socket.on("message", this.handleMessage.bind(this));
+    this.socket.on("close", this.destroy.bind(this));
+
+    await new Promise(r => setTimeout(r, 10));
+
+    this.webSocketManager.nip.registrars.forEach(async (registrar) => {
+      registrar({
+        api: await this.webSocketManager.nip.apiManager.buildAPI(this),
+        connection: this,
+      });
+    });
   }
 
   async destroy() {

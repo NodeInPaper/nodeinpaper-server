@@ -12,12 +12,15 @@ export type RefType = { $type: "Reference", id: string, value: any };
 export function singularExecute(connection: SocketConnection, path: InfiniteProxyPathKey[], isSync: boolean) {
   return new Promise(async (resolve, reject) => {
     const res = (await connection.sendAndWaitResponse("SingularExecute", {
-      path: path.slice(0, -1),
+      path,
       sync: isSync
     })) as ExecuteResponse;
-    if (!res.ok) return reject(res.data);
-    resolve(res.data);
+    resolve([res.ok, res.data]);
   });
+}
+
+function buildResponseMap(response: ((value: any) => any)[]) {
+
 }
 
 export function buildSingularAPI(connection: SocketConnection, startPath: InfiniteProxyPathKey[] = []) {
@@ -29,10 +32,12 @@ export function buildSingularAPI(connection: SocketConnection, startPath: Infini
     switch (lastKey.key) {
       case "$execute":
       case "$exec": {
-        if (typeof lastKey.args![0]?.sync === "boolean") {
-          return singularExecute(connection, path, !!lastKey.args![0]?.sync);
+        if (typeof lastKey.args![0] === "object") {
+          const { sync = false, response } = lastKey.args![0];
+
+          return singularExecute(connection, path.slice(0, -1), sync,);
         }
-        return singularExecute(connection, path, false);
+        return singularExecute(connection, path.slice(0, -1), false);
       }
     }
 

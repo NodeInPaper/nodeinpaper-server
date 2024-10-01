@@ -7,14 +7,14 @@ import crypto from "crypto";
 export class WebSocketManager {
   wss!: WebSocketServer;
   connections: Map<string, SocketConnection> = new Map();
-  constructor(public nip: NIPServer) {}
+  constructor(public nip: NIPServer) { }
 
   async init() {
     this.wss = new WebSocketServer({
       port: this.nip.config.port,
       host: this.nip.config.host,
     });
-    this.wss.on("connection", this.handleConnection);
+    this.wss.on("connection", this.handleConnection.bind(this));
   }
 
   async destroy() {
