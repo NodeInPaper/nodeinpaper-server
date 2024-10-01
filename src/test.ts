@@ -16,6 +16,9 @@ nip.register(async ({ api: { plugin }, onDestroy }) => {
 
       console.log({ player });
 
+      const [, justId] = await player.getUniqueId().toString().$exec();
+      console.log({ justId });
+
       player.sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
 
       const [isGetOK, getRes] = await player.$get(
