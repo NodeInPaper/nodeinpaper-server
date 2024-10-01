@@ -20,15 +20,6 @@ export function singularExecute(connection: SocketConnection, path: InfiniteProx
     })) as ExecuteResponse;
     if (!res) return resolve([true, "Not connected to server"]);
 
-    console.log(
-      "singularExecute post",
-      util.inspect({
-        path,
-        sync: isSync,
-        responseMap: responseMap,
-        res
-      }, { depth: 10, colors: true })
-    )
     if (!res.ok) return resolve([res.ok, res.data]);
     if (!res.data) return resolve([res.ok, null]);
     resolve([
