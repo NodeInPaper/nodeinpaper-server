@@ -128,7 +128,7 @@ export function buildSingularAPI({
         return singularExecute({
           connection,
           path: path.slice(0, -1),
-          isSync: true,
+          isSync: false,
           responseMap: buildResponseMap(lastKey.args![0] || {}),
           base
         });
