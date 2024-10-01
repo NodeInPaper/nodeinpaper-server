@@ -1,10 +1,12 @@
 export const ContinueToInfinitePath = Symbol("ContinueToInfinitePath");
+export const CurrentInfinitePath = Symbol("CurrentInfinitePath");
 
 export type InfiniteProxyPathKey = { key: string, type: "Get" | "Apply", args?: any[] };
 
 export function createInfinitePathProxy(onApplyPath: (path: InfiniteProxyPathKey[], ...args: any[]) => any, path: InfiniteProxyPathKey[] = []): any {
   return new Proxy(() => { }, {
     get(target, key) {
+      if (key === CurrentInfinitePath) return path;
       return createInfinitePathProxy(onApplyPath, [...path, {
         key: key.toString(),
         type: "Get"

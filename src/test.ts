@@ -9,8 +9,18 @@ nip.register(async ({ api: { singular } }) => {
   console.log("Registered!");
   setInterval(async () => {
     try {
-      const res = await singular.getServer().getPlayer("TheArmagan").sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
-      console.log(res);
+      await singular.getServer().getPlayer("TheArmagan").sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
+      const [isGetOK, getRes] = await singular.getServer().getPlayer("TheArmagan").$get([
+        [
+          "uuid",
+          (p: any) => p.getUniqueId().toString(),
+        ]
+      ]);
+
+      console.log({
+        isGetOK,
+        getRes,
+      });
     } catch (e) {
       console.error(e);
     }

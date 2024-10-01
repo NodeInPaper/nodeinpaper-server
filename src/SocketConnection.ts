@@ -52,6 +52,7 @@ export class SocketConnection {
   }
 
   async sendAndWaitResponse(event: string, data: any) {
+    if (this.socket.readyState !== WebSocket.OPEN) return;
     return new Promise((resolve) => {
       const responseId = crypto.randomUUID();
       this.pendingResponses.set(responseId, resolve);
