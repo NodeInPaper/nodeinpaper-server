@@ -73,7 +73,7 @@ export function singularExecute({
                 }
               });
             }
-            return item;
+            return responseMap.length ? Object.fromEntries(item.map((i: any) => [i.key, i.value])) : item;
           })
         ]
       )
