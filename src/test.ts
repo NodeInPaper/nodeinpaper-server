@@ -5,7 +5,7 @@ const nip = createNIPServer({
   host: "0.0.0.0",
 });
 
-nip.register(async ({ api: { plugin }, onDestroy }) => {
+nip.register(async ({ api: { $plugin, $class }, onDestroy }) => {
   console.log("Registered!");
   let interval = setInterval(async () => {
     try {
@@ -14,7 +14,10 @@ nip.register(async ({ api: { plugin }, onDestroy }) => {
       //   .getPlayer("TheArmagan")
       //   .$exec();
 
-      const [, onlinePlayers] = await plugin.getServer().getOnlinePlayers().$exec();
+      const [, javaPI] = await $class("java.lang.Math").PI.$exec();
+      console.log({ javaPI });
+
+      const [, onlinePlayers] = await $plugin.getServer().getOnlinePlayers().$exec();
       // console.log({ onlinePlayers });
 
       onlinePlayers.forEach(async (player: any) => {

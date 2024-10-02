@@ -7,21 +7,26 @@ export interface ExecuteResponse {
   data: any;
 }
 
-export type RefType = { __type__: "Reference", id: string };
+export interface SingularExecuteBase {
+  type: "Plugin" | "Reference" | "Class" | "ClassFromPath";
+  id?: string;
+  file?: string;
+  name?: string;
+}
 
 export function singularExecute({
   connection,
   path,
   isSync,
   responseMap = [],
-  base = "Plugin",
+  base = { type: "Plugin" },
   noRef = false
 }: {
   connection: SocketConnection,
   path: InfiniteProxyPathKey[],
   isSync: boolean,
   responseMap?: { key: string, path: InfiniteProxyPathKey[] }[],
-  base?: String,
+  base?: SingularExecuteBase,
   noRef?: boolean
 }) {
   return new Promise(async (resolve) => {
@@ -44,7 +49,10 @@ export function singularExecute({
           null,
           buildSingularAPI({
             connection,
-            base: res.data.id,
+            base: {
+              type: "Reference",
+              id: res.data.id
+            },
             hardCodedValues: {
               $refId: res.data.id,
               $unRef: () => {
@@ -64,7 +72,10 @@ export function singularExecute({
             if (item?.__type__ === "Reference" && item.id) {
               return buildSingularAPI({
                 connection,
-                base: item.id,
+                base: {
+                  type: "Reference",
+                  id: item.id
+                },
                 hardCodedValues: {
                   $refId: item.id,
                   $unRef: () => {
@@ -98,12 +109,12 @@ export function buildResponseMap(toMap: Record<string, (value: any) => any>): { 
 export function buildSingularAPI({
   connection,
   startPath = [],
-  base = "Plugin",
+  base,
   hardCodedValues = {}
 }: {
   connection: SocketConnection,
   startPath?: InfiniteProxyPathKey[],
-  base?: string,
+  base?: SingularExecuteBase,
   hardCodedValues?: Record<string, any>
 }) {
   return createInfinitePathProxy((path, ...args) => {
@@ -204,25 +215,48 @@ export class APIManager {
 
   async buildAPI(connection: SocketConnection) {
     return {
-      plugin: buildSingularAPI({
+      $plugin: buildSingularAPI({
         connection,
+        base: {
+          type: "Plugin"
+        }
       }),
-      async ref(id: string) {
+      $ref(id: string) {
         return buildSingularAPI({
           connection,
-          base: id
+          base: {
+            type: "Reference",
+            id
+          }
         });
       },
-      async unRef(id: string) {
-        connection.send("RemoveReference", id);
+      $class(name: string) {
+        return buildSingularAPI({
+          connection,
+          base: {
+            type: "Class",
+            name
+          }
+        });
       },
-      async accessRef(id: string, pathCb: (v: any) => any = (v) => v) {
-        const res = await connection.sendAndWaitResponse("AccessReference", {
-          id,
-          path: pathCb(createInfinitePathProxy(() => ContinueToInfinitePath, []))[CurrentInfinitePath]
-        }) as any;
-        return res.ok ? [null, res.data] : [res.data, null];
-      }
+      $classFromPath(filePath: string, name: string) {
+        return buildSingularAPI({
+          connection,
+          base: {
+            type: "ClassFromPath",
+            file: filePath,
+            name
+          }
+        });
+      },
+      async $unRef(id: string) {
+        const res = await connection.sendAndWaitResponse("RemoveReference", id) as any;
+        return res.ok ? [null, true] : [res.data, null];
+      },
+      async $keepAliveRef(id: string) {
+        const res = await connection.sendAndWaitResponse("KeepAliveReference", id) as any;
+        return res.ok ? [null, true] : [res.data, null];
+      },
     }
   }
 }
