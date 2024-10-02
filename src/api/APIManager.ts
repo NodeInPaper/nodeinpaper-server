@@ -32,13 +32,11 @@ export function singularExecute({
       base,
       noRef
     })) as ExecuteResponse;
-    console.log(res);
 
     if (!res) return resolve(["Not connected to server", null]);
 
     if (!res.ok) return resolve([res.data, null]);
     if (!res.data) return resolve([null, null]);
-
 
     if (res.data?.__type__ === "Reference" && res.data.id) {
       return resolve(
