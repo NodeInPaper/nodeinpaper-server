@@ -48,7 +48,7 @@ nip.register(async ({ api: { $plugin, $class }, onDestroy, registerCommand }) =>
   registerCommand({
     name: "nodejs-test",
     async onExecute(sender, label, ...args) {
-      const [, playerName] = await sender.getName().$exec();
+      const [, playerName] = await sender.getName().$get();
       console.log("Command executed!");
       sender.sendPlainMessage(`Hello from node.js! Your name: ${playerName}`).$run();
     }
