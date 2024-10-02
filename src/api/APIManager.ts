@@ -29,15 +29,15 @@ export function singularExecute({
       response: responseMap,
       base
     })) as ExecuteResponse;
-    if (!res) return resolve([false, "Not connected to server"]);
+    if (!res) return resolve(["Not connected to server", null]);
 
-    if (!res.ok) return resolve([res.ok, res.data]);
-    if (!res.data) return resolve([res.ok, null]);
+    if (!res.ok) return resolve([res.data, null]);
+    if (!res.data) return resolve([null, null]);
 
     if (res.data?.__type__ === "Reference" && res.data.id) {
       return resolve(
         [
-          true,
+          null,
           buildSingularAPI({
             connection,
             base: res.data.id,
@@ -53,7 +53,7 @@ export function singularExecute({
     }
 
     resolve([
-      res.ok,
+      null,
       responseMap.length ? Object.fromEntries(res.data.map((i: any) => [i.key, i.value])) : res.data
     ]);
   });
@@ -161,7 +161,7 @@ export class APIManager {
           id,
           path: pathCb(createInfinitePathProxy(() => ContinueToInfinitePath, []))[CurrentInfinitePath]
         }) as any;
-        return [res.ok, res.data];
+        return res.ok ? [null, res.data] : [res.data, null];
       }
     }
   }

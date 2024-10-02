@@ -19,9 +19,7 @@ nip.register(async ({ api: { plugin }, onDestroy }) => {
       const [, justId] = await player.getUniqueId().toString().$exec();
       console.log({ justId });
 
-      player.sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
-
-      const [isGetOK, getRes] = await player.$get(
+      const [error, res] = await player.$get(
         {
           uuid: (p: any) => p.getUniqueId().toString(),
           x: (p: any) => p.getLocation().getX(),
@@ -30,10 +28,14 @@ nip.register(async ({ api: { plugin }, onDestroy }) => {
         }
       );
 
+      player.sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
+      player.sendPlainMessage(`Your Data: ${JSON.stringify(res)}`).$exec();
+
+
       console.log({
         date: new Date().toLocaleString(),
-        isGetOK,
-        getRes,
+        error,
+        res
       });
     } catch (e) {
       console.error(e);
