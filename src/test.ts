@@ -5,17 +5,18 @@ const nip = createNIPServer({
   host: "0.0.0.0",
 });
 
-nip.register(async ({ api: { $plugin, $class }, onDestroy }) => {
+nip.register(async ({ api: { $plugin, $class }, onDestroy, registerCommand }) => {
   console.log("Registered!");
   let interval = setInterval(async () => {
+    return;
     try {
       // const [, player] = await plugin
       //   .getServer()
       //   .getPlayer("TheArmagan")
       //   .$exec();
 
-      const [, javaPI] = await $class("java.lang.Math").PI.$exec();
-      console.log({ javaPI });
+      // const [, javaPI] = await $class("java.lang.Math").PI.$exec();
+      // console.log({ javaPI });
 
       const [, onlinePlayers] = await $plugin.getServer().getOnlinePlayers().$exec();
       // console.log({ onlinePlayers });
@@ -43,6 +44,15 @@ nip.register(async ({ api: { $plugin, $class }, onDestroy }) => {
       console.error(e);
     }
   }, 100);
+
+  registerCommand({
+    name: "nodejs-test",
+    async onExecute(sender, label, ...args) {
+      const [, playerName] = await sender.getName().$exec();
+      console.log("Command executed!");
+      sender.sendPlainMessage(`Hello from node.js! Your name: ${playerName}`).$run();
+    }
+  })
 
   onDestroy(() => {
     clearInterval(interval);

@@ -3,10 +3,12 @@ import { WebSocket } from "ws";
 import { WebSocketManager } from "./WebSocketManager";
 
 import util from "util";
+import { buildSingularAPI } from "./api/APIManager";
 
 export class SocketConnection {
   private pendingResponses: Map<string, (data: any) => void> = new Map();
   private onDestroys: (() => void)[] = [];
+  private commandCbs: Map<string, (sender: any, label: string, ...args: string[]) => void> = new Map();
   constructor(
     public webSocketManager: WebSocketManager,
     public socket: WebSocket,
@@ -30,7 +32,35 @@ export class SocketConnection {
         connection: this,
         onDestroy(cb: () => void) {
           self.onDestroys.push(cb);
-        }
+        },
+        async registerCommand({
+          name,
+          namespace = "nip",
+          aliases = [],
+          description = "",
+          usage = "",
+          onExecute
+        }: {
+          name: string;
+          namespace?: string;
+          aliases?: string[];
+          description?: string;
+          usage?: string;
+          onExecute(sender: any, label: string, ...args: string[]): void;
+        }) {
+          self.commandCbs.set(`${namespace}:${name}`, onExecute);
+          const res = await self.sendAndWaitResponse(
+            "RegisterCommand",
+            {
+              name,
+              namespace,
+              aliases,
+              description,
+              usage
+            }
+          ) as any;
+          return res.ok ? [null, true] : [res.data, null];
+        },
       });
     });
   }
@@ -42,6 +72,7 @@ export class SocketConnection {
     this.webSocketManager.connections.delete(this.id);
     this.onDestroys.forEach((cb) => cb());
     this.onDestroys.length = 0;
+    this.commandCbs.clear();
   }
 
   async handleMessage(data: string) {
@@ -56,12 +87,27 @@ export class SocketConnection {
         this.pendingResponses.delete(responseId);
         break;
       }
+      case "ExecuteCommand": {
+        const { name, namespace, sender, label, args } = json.data;
+        this.commandCbs.get(`${namespace}:${name}`)?.(
+          buildSingularAPI({
+            connection: this,
+            base: {
+              type: "Reference",
+              id: sender.id
+            }
+          }),
+          label,
+          ...args
+        );
+        break;
+      }
     }
   }
 
   async sendAndWaitResponse(event: string, data: any) {
     if (this.socket.readyState !== WebSocket.OPEN) return;
-    // console.log("Sending", event, util.inspect(data, { depth: 10, colors: true }));
+    console.log("Sending", event, util.inspect(data, { depth: 10, colors: true }));
     return new Promise((resolve) => {
       const responseId = crypto.randomUUID();
       this.pendingResponses.set(responseId, resolve);

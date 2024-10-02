@@ -256,7 +256,7 @@ export class APIManager {
       async $keepAliveRef(id: string) {
         const res = await connection.sendAndWaitResponse("KeepAliveReference", id) as any;
         return res.ok ? [null, true] : [res.data, null];
-      },
+      }
     }
   }
 }

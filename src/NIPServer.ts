@@ -11,6 +11,14 @@ export interface RegistrarAPI {
   api: Awaited<ReturnType<APIManager["buildAPI"]>>;
   connection: SocketConnection;
   onDestroy(cb: () => void): void;
+  registerCommand(ctx: {
+    name: string;
+    namespace?: string;
+    aliases?: string[];
+    description?: string;
+    usage?: string;
+    onExecute(sender: any, label: string, ...args: string[]): Promise<void>;
+  }): Promise<[any, boolean]>;
 }
 
 export class NIPServer {
