@@ -10,7 +10,7 @@ export interface NIPServerConfig {
 export interface RegistrarAPI {
   api: Awaited<ReturnType<APIManager["buildAPI"]>>;
   connection: SocketConnection;
-  onDestroy(cb: () => void): void;
+  onDisconnect(cb: () => void): void;
   registerCommand(ctx: {
     name: string;
     namespace?: string;
@@ -18,6 +18,11 @@ export interface RegistrarAPI {
     description?: string;
     usage?: string;
     onExecute(sender: any, label: string, ...args: string[]): Promise<void>;
+  }): Promise<[any, boolean]>;
+  registerEvent(ctx: {
+    name: string;
+    priority?: "LOWEST" | "LOW" | "NORMAL" | "HIGH" | "HIGHEST";
+    onExecute(event: any): Promise<void>;
   }): Promise<[any, boolean]>;
 }
 

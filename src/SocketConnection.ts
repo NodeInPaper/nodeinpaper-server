@@ -7,8 +7,9 @@ import { buildSingularAPI } from "./api/APIManager";
 
 export class SocketConnection {
   private pendingResponses: Map<string, (data: any) => void> = new Map();
-  private onDestroys: (() => void)[] = [];
+  private onDisconnects: (() => void)[] = [];
   private commandCbs: Map<string, (sender: any, label: string, ...args: string[]) => void> = new Map();
+  private eventCbs: Map<string, (event: any) => void> = new Map();
   constructor(
     public webSocketManager: WebSocketManager,
     public socket: WebSocket,
@@ -30,8 +31,9 @@ export class SocketConnection {
       registrar({
         api: await this.webSocketManager.nip.apiManager.buildAPI(this),
         connection: this,
-        onDestroy(cb: () => void) {
-          self.onDestroys.push(cb);
+        onDisconnect(cb: () => void) {
+          self.onDisconnects.push(cb);
+          return true;
         },
         async registerCommand({
           name,
@@ -59,7 +61,29 @@ export class SocketConnection {
               usage
             }
           ) as any;
-          return res.ok ? [null, true] : [res.data, null];
+
+          if (!res.ok) throw res.data;
+          return res.data;
+        },
+        async registerEvent({
+          name,
+          priority = "NORMAL",
+          onExecute
+        }: {
+          name: string;
+          priority?: "LOWEST" | "LOW" | "NORMAL" | "HIGH" | "HIGHEST";
+          onExecute(event: any): void;
+        }) {
+          self.eventCbs.set(name, onExecute);
+          const res = await self.sendAndWaitResponse(
+            "RegisterEvent",
+            {
+              name,
+              priority
+            }
+          ) as any;
+          if (!res.ok) throw res.data;
+          return res.data;
         },
       });
     });
@@ -70,9 +94,10 @@ export class SocketConnection {
     this.socket.off("close", this.destroy);
     this.socket.close();
     this.webSocketManager.connections.delete(this.id);
-    this.onDestroys.forEach((cb) => cb());
-    this.onDestroys.length = 0;
+    this.onDisconnects.forEach((cb) => cb());
+    this.onDisconnects.length = 0;
     this.commandCbs.clear();
+    this.eventCbs.clear();
   }
 
   async handleMessage(data: string) {
@@ -99,6 +124,19 @@ export class SocketConnection {
           }),
           label,
           ...args
+        );
+        break;
+      }
+      case "ExecuteEvent": {
+        const { name, event } = json.data;
+        this.eventCbs.get(name)?.(
+          buildSingularAPI({
+            connection: this,
+            base: {
+              type: "Reference",
+              id: event.id
+            }
+          })
         );
         break;
       }

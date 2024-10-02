@@ -29,7 +29,7 @@ export function singularExecute({
   base?: SingularExecuteBase,
   noRef?: boolean
 }) {
-  return new Promise(async (resolve) => {
+  return new Promise(async (resolve, reject) => {
     const res = (await connection.sendAndWaitResponse("SingularExecute", {
       path,
       sync: isSync,
@@ -38,15 +38,15 @@ export function singularExecute({
       noRef
     })) as ExecuteResponse;
 
-    if (!res) return resolve(["Not connected to server", null]);
+    if (!res) return reject("No response from server");
 
-    if (!res.ok) return resolve([res.data, null]);
-    if (!res.data) return resolve([null, null]);
+    if (!res.ok) return reject(res.data);
+    if (typeof res.data === "undefined") return resolve([null]);
 
     if (res.data?.__type__ === "Reference" && res.data.id) {
+      // console.log("Building ref", res.data.id, "for", path, base);
       return resolve(
         [
-          null,
           buildSingularAPI({
             connection,
             base: {
@@ -67,7 +67,6 @@ export function singularExecute({
     if (res.data?.__type__ === "List" && res.data.list) {
       return resolve(
         [
-          null,
           res.data.list.map((item: any) => {
             if (item?.__type__ === "Reference" && item.id) {
               return buildSingularAPI({
@@ -90,8 +89,7 @@ export function singularExecute({
       )
     }
 
-    resolve([
-      null,
+    return resolve([
       responseMap.length ? Object.fromEntries(res.data.map((i: any) => [i.key, i.value])) : res.data
     ]);
   });
@@ -173,17 +171,17 @@ export function buildSingularAPI({
           isSync: false,
           responseMap: buildResponseMap(lastKey.args![0] || {}),
           base,
-          noRef: true
+          noRef: false
         });
       }
       case "$getSync": {
         return singularExecute({
           connection,
           path: path.slice(0, -1),
-          isSync: false,
+          isSync: true,
           responseMap: buildResponseMap(lastKey.args![0] || {}),
           base,
-          noRef: true
+          noRef: false
         });
       }
       case "$run": {
