@@ -107,7 +107,7 @@ export class SocketConnection {
 
   async sendAndWaitResponse(event: string, data: any) {
     if (this.socket.readyState !== WebSocket.OPEN) return;
-    console.log("Sending", event, util.inspect(data, { depth: 10, colors: true }));
+    // console.log("Sending", event, util.inspect(data, { depth: 10, colors: true }));
     return new Promise((resolve) => {
       const responseId = crypto.randomUUID();
       this.pendingResponses.set(responseId, resolve);
