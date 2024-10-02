@@ -9,33 +9,32 @@ nip.register(async ({ api: { plugin }, onDestroy }) => {
   console.log("Registered!");
   let interval = setInterval(async () => {
     try {
-      const [, player] = await plugin
-        .getServer()
-        .getPlayer("TheArmagan")
-        .$exec();
+      // const [, player] = await plugin
+      //   .getServer()
+      //   .getPlayer("TheArmagan")
+      //   .$exec();
 
-      console.log({ player });
+      const [, onlinePlayers] = await plugin.getServer().getOnlinePlayers().$exec();
+      console.log({ onlinePlayers });
 
-      const [, justId] = await player.getUniqueId().toString().$exec();
-      console.log({ justId });
+      onlinePlayers.forEach(async (player: any) => {
+        const [error, res] = await player.$get(
+          {
+            uuid: (p: any) => p.getUniqueId().toString(),
+            x: (p: any) => p.getLocation().getX(),
+            y: (p: any) => p.getLocation().getY(),
+            z: (p: any) => p.getLocation().getZ(),
+          }
+        );
 
-      const [error, res] = await player.$get(
-        {
-          uuid: (p: any) => p.getUniqueId().toString(),
-          x: (p: any) => p.getLocation().getX(),
-          y: (p: any) => p.getLocation().getY(),
-          z: (p: any) => p.getLocation().getZ(),
-        }
-      );
+        //player.sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
+        player.sendActionBar(`X: ${res.x.toFixed(2)} Y: ${res.y.toFixed(2)} Z: ${res.z.toFixed(2)}`).$run();
 
-      //player.sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
-      player.sendActionBar(`X: ${res.x.toFixed(2)} Y: ${res.y.toFixed(2)} Z: ${res.z.toFixed(2)}`).$run();
-
-
-      console.log({
-        date: new Date().toLocaleString(),
-        error,
-        res
+        console.log({
+          date: new Date().toLocaleString(),
+          error,
+          res
+        });
       });
     } catch (e) {
       console.error(e);
