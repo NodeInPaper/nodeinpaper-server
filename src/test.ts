@@ -8,7 +8,7 @@ const nip = createNIPServer({
 nip.register(async ({ api: { $plugin, $class }, onDestroy, registerCommand }) => {
   console.log("Registered!");
   let interval = setInterval(async () => {
-    return;
+    // return;
     try {
       // const [, player] = await plugin
       //   .getServer()
