@@ -35,8 +35,6 @@ nip.register(async ({ api: { plugin }, onDestroy }) => {
         isGetOK,
         getRes,
       });
-
-      player.$unRef();
     } catch (e) {
       console.error(e);
     }
