@@ -28,8 +28,8 @@ nip.register(async ({ api: { plugin }, onDestroy }) => {
         }
       );
 
-      player.sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
-      player.sendPlainMessage(`Your Data: ${JSON.stringify(res)}`).$exec();
+      //player.sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
+      player.sendActionBar(`X: ${res.x.toFixed(2)} Y: ${res.y.toFixed(2)} Z: ${res.z.toFixed(2)}`).$run();
 
 
       console.log({

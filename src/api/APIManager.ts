@@ -14,20 +14,23 @@ export function singularExecute({
   path,
   isSync,
   responseMap = [],
-  base = "Plugin"
+  base = "Plugin",
+  noRef = false
 }: {
   connection: SocketConnection,
   path: InfiniteProxyPathKey[],
   isSync: boolean,
   responseMap?: { key: string, path: InfiniteProxyPathKey[] }[],
-  base?: String
+  base?: String,
+  noRef?: boolean
 }) {
   return new Promise(async (resolve) => {
     const res = (await connection.sendAndWaitResponse("SingularExecute", {
       path,
       sync: isSync,
       response: responseMap,
-      base
+      base,
+      noRef
     })) as ExecuteResponse;
     if (!res) return resolve(["Not connected to server", null]);
 
@@ -88,40 +91,44 @@ export function buildSingularAPI({
       case "$execute":
       case "$exec": {
         if (typeof lastKey.args![0] === "object") {
-          const { sync = false, response = [] } = lastKey.args![0];
+          const { sync = false, response = [], noRef = false } = lastKey.args![0];
 
           return singularExecute({
             connection,
             path: path.slice(0, -1),
             isSync: sync,
             responseMap: buildResponseMap(response),
-            base
+            base,
+            noRef
           });
         }
         return singularExecute({
           connection,
           path: path.slice(0, -1),
           isSync: false,
-          base
+          base,
+          noRef: false
         });
       }
       case "$executeSync":
       case "$execSync": {
         if (typeof lastKey.args![0] === "object") {
-          const { response = [] } = lastKey.args![0];
+          const { response = [], noRef = false } = lastKey.args![0];
           return singularExecute({
             connection,
             path: path.slice(0, -1),
             isSync: true,
             responseMap: buildResponseMap(response),
-            base
+            base,
+            noRef
           })
         }
         return singularExecute({
           connection,
           path: path.slice(0, -1),
           isSync: true,
-          base
+          base,
+          noRef: false
         });
       }
       case "$get": {
@@ -130,7 +137,36 @@ export function buildSingularAPI({
           path: path.slice(0, -1),
           isSync: false,
           responseMap: buildResponseMap(lastKey.args![0] || {}),
-          base
+          base,
+          noRef: true
+        });
+      }
+      case "$getSync": {
+        return singularExecute({
+          connection,
+          path: path.slice(0, -1),
+          isSync: false,
+          responseMap: buildResponseMap(lastKey.args![0] || {}),
+          base,
+          noRef: true
+        });
+      }
+      case "$run": {
+        return singularExecute({
+          connection,
+          path: path.slice(0, -1),
+          isSync: false,
+          base,
+          noRef: true
+        });
+      }
+      case "$runSync": {
+        return singularExecute({
+          connection,
+          path: path.slice(0, -1),
+          isSync: true,
+          base,
+          noRef: true
         });
       }
     }
