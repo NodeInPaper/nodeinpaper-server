@@ -45,11 +45,11 @@ export class SocketConnection {
   }
 
   async handleMessage(data: string) {
-    const json = JSON.parse(data);
+    const json = JSON.parse(data) as { event: string, data: any, responseId?: string };
 
     switch (json.event) {
       case "Response": {
-        const responseId = json.responseId;
+        const responseId = json.responseId!;
         const resolve = this.pendingResponses.get(responseId);
         if (!resolve) break;
         resolve(json.data);
@@ -65,11 +65,12 @@ export class SocketConnection {
     return new Promise((resolve) => {
       const responseId = crypto.randomUUID();
       this.pendingResponses.set(responseId, resolve);
-      this.socket.send(JSON.stringify({ event, data, responseId }));
+      this.send(event, data, responseId);
     });
   }
 
-  async send(event: string, data: any) {
-    this.socket.send(JSON.stringify({ event, data }));
+  async send(event: string, data: any, responseId?: string) {
+    if (this.socket.readyState !== WebSocket.OPEN) return;
+    this.socket.send(JSON.stringify({ event, data, responseId }));
   }
 }

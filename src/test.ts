@@ -15,7 +15,7 @@ nip.register(async ({ api: { plugin }, onDestroy }) => {
       //   .$exec();
 
       const [, onlinePlayers] = await plugin.getServer().getOnlinePlayers().$exec();
-      console.log({ onlinePlayers });
+      // console.log({ onlinePlayers });
 
       onlinePlayers.forEach(async (player: any) => {
         const [error, res] = await player.$get(
@@ -30,16 +30,16 @@ nip.register(async ({ api: { plugin }, onDestroy }) => {
         //player.sendPlainMessage(`Hello from node.js! Time is: ${new Date().toLocaleString()}`).$exec();
         player.sendActionBar(`X: ${res.x.toFixed(2)} Y: ${res.y.toFixed(2)} Z: ${res.z.toFixed(2)}`).$run();
 
-        console.log({
-          date: new Date().toLocaleString(),
-          error,
-          res
-        });
+        // console.log({
+        //   date: new Date().toLocaleString(),
+        //   error,
+        //   res
+        // });
       });
     } catch (e) {
       console.error(e);
     }
-  }, 1000);
+  }, 100);
 
   onDestroy(() => {
     clearInterval(interval);
