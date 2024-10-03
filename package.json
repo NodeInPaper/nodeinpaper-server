@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "tsx src/index.ts",
-    "test": "tsx src/test.ts"
+    "test": "tsx src/test.ts",
+    "build": "tsc"
   },
   "keywords": [
     "paper",

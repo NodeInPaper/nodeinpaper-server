@@ -12,6 +12,14 @@ development server is [here](https://discord.gg/Gk8yruSrak)
 - accessing custom classes from other jars
 - getting raw values from java objects
 - getting java object references (look to example code)
+- registering commands
+- registering events
+- cancelling events
+- unrefing objects from memory
+- and more!
+
+# todo
+- [ ] full typescript support for java objects
 
 # how to use
 1. add the latest [nodeinpaper-client plugin](https://github.com/NodeInPaper/nodeinpaper-client/releases) to your paper server
