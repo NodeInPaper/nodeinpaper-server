@@ -1,6 +1,8 @@
 # nodeinpaper-server
 NodeInPaper allows you to run node.js code in a Minecraft Java Edition Paper Server. (this project is still in development)
 
+### current version: 0.0.1
+
 # discord
 development server is [here](https://discord.gg/Gk8yruSrak)
 
@@ -81,8 +83,11 @@ nip.register(async ({ api: { $plugin, $class, $classFromPath }, onDisconnect, re
     cancelConditions: {
       and: [
         {
-          a: true,
-          b: true,
+          a: {
+            base: "Context",
+            path: (c) => c.getMessage()
+          },
+          b: "cancel me",
           op: "=="
         }
       ]

@@ -50,8 +50,11 @@ nip.register(async ({ api: { $plugin, $class, $classFromPath }, onDisconnect, re
     cancelConditions: {
       and: [
         {
-          a: true,
-          b: true,
+          a: {
+            base: "Context",
+            path: (c) => c.getMessage()
+          },
+          b: "cancel me",
           op: "=="
         }
       ]
