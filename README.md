@@ -1,10 +1,12 @@
 # nodeinpaper-server
- NodeInPaper allows you to run node.js code in a Minecraft Java Edition Paper Server. (this project is still in development)
+NodeInPaper allows you to run node.js code in a Minecraft Java Edition Paper Server. (this project is still in development)
 
 # discord
 development server is [here](https://discord.gg/Gk8yruSrak)
 
 # features
+- use every node.js feature!
+- using async/await
 - accessing entire paper api
 - accessing custom classeses
 - accessing custom classes from other jars
@@ -12,7 +14,7 @@ development server is [here](https://discord.gg/Gk8yruSrak)
 - getting java object references (look to example code)
 
 # how to use
-1. add [nodeinpaper-client plugin](https://github.com/NodeInPaper/nodeinpaper-client) to your paper server
+1. add the latest [nodeinpaper-client plugin](https://github.com/NodeInPaper/nodeinpaper-client/releases) to your paper server
 2. add nodeinpaper-server to your node.js project
 3. enjoy! (look to example code)
 
