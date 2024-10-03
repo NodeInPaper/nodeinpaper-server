@@ -1,6 +1,6 @@
 {
   "name": "nodeinpaper-server",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "NodeInPaper allows you to run node.js code in a Minecraft Java Edition Paper Server",
   "main": "src/index.ts",
   "scripts": {
@@ -17,7 +17,10 @@
     "ts",
     "mc",
     "remote",
-    "server"
+    "server",
+    "plugin",
+    "nodeinpaper",
+    "nodeinpaper-server"
   ],
   "author": {
     "name": "Kıraç Armağan Önal",
