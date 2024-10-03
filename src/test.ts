@@ -8,34 +8,28 @@ const nip = createNIPServer({
 nip.register(async ({ api: { $plugin, $class }, onDisconnect, registerCommand, registerEvent }) => {
   console.log("Registered!");
   let interval = setInterval(async () => {
-    // return;
-    try {
-      const [onlinePlayers] = await $plugin.getServer().getOnlinePlayers().$get();
+    const [onlinePlayers] = await $plugin.getServer().getOnlinePlayers().$get();
 
-      onlinePlayers.forEach(async (player: any) => {
-        const [res] = await player.$get(
-          {
-            uuid: (p: any) => p.getUniqueId().toString(),
-            x: (p: any) => p.getLocation().getX(),
-            y: (p: any) => p.getLocation().getY(),
-            z: (p: any) => p.getLocation().getZ(),
-          }
-        );
+    onlinePlayers.forEach(async (player: any) => {
+      const [res] = await player.$get(
+        {
+          uuid: (p: any) => p.getUniqueId().toString(),
+          x: (p: any) => p.getLocation().getX(),
+          y: (p: any) => p.getLocation().getY(),
+          z: (p: any) => p.getLocation().getZ(),
+        }
+      );
 
-        player.sendActionBar(`X: ${res.x.toFixed(2)} Y: ${res.y.toFixed(2)} Z: ${res.z.toFixed(2)}`).$run();
-      });
-    } catch (e) {
-      console.error(e);
-    }
+      player.sendActionBar(`X: ${res.x.toFixed(2)} Y: ${res.y.toFixed(2)} Z: ${res.z.toFixed(2)}`).$run();
+    });
   }, 100);
 
   registerCommand({
     name: "nodejs-test",
     async onExecute(sender, label, ...args) {
-      const playerName = await sender.getName().$get();
+      const [playerName] = await sender.getName().$get();
       console.log("Command executed!");
       await sender.sendPlainMessage(`Hello from node.js! Your name: ${playerName}`).$run();
-
       sender.$unRef();
     }
   })
