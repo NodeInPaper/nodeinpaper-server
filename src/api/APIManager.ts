@@ -213,7 +213,16 @@ export interface ICondition {
     base?: "Context" | "Plugin";
     path: (v: any) => any;
   };
-  op: "==" | "!=" | ">" | "<" | ">=" | "<=" | "Contains" | "NotContains" | "MatchesRegex" | "NotMatchesRegex";
+  op: "=="
+  | "!="
+  | ">"
+  | "<"
+  | ">="
+  | "<="
+  | "Contains"
+  | "NotContains"
+  | "MatchesRegex"
+  | "NotMatchesRegex";
   b: string | number | boolean | {
     base?: "Context" | "Plugin";
     path: (v: any) => any;
