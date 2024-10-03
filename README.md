@@ -113,8 +113,8 @@ nip.init();
 # alternative executors
 - `.$run()`: runs the method on server asynchronously and returns a promise without any value
 - `.$get()`: runs the method on server asynchronously and returns a promise with the value
-- `.$runSync()`: runs the method on server synchronously and returns nothing
-- `.$getSync()`: runs the method on server synchronously and returns the value
+- `.$runSync()`: runs the method on server synchronously and returns a promise without any value
+- `.$getSync()`: runs the method on server synchronously and returns a promise with the value
 - `.$exec()`: look into source code
 - `.$execSync()`: look into source code
 - `.$unRef()`: unrefs the object from memory (from java side)
