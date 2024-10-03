@@ -5,7 +5,7 @@ const nip = createNIPServer({
   host: "0.0.0.0",
 });
 
-nip.register(async ({ api: { $plugin, $class }, onDisconnect, registerCommand, registerEvent }) => {
+nip.register(async ({ api: { $plugin, $class, $classFromPath }, onDisconnect, registerCommand, registerEvent }) => {
   console.log("Registered!");
   let interval = setInterval(async () => {
     const [onlinePlayers] = await $plugin.getServer().getOnlinePlayers().$get();
@@ -72,4 +72,3 @@ nip.register(async ({ api: { $plugin, $class }, onDisconnect, registerCommand, r
 });
 
 nip.init();
-
