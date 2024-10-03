@@ -1,5 +1,5 @@
-import { APIManager } from "./api/APIManager";
-import { SocketConnection } from "./SocketConnection";
+import { APIManager, ICondition, IConditionGroup } from "./api/APIManager";
+import { EventPriority, SocketConnection } from "./SocketConnection";
 import { WebSocketManager } from "./WebSocketManager";
 
 export interface NIPServerConfig {
@@ -21,7 +21,8 @@ export interface RegistrarAPI {
   }): Promise<[any, boolean]>;
   registerEvent(ctx: {
     name: string;
-    priority?: "LOWEST" | "LOW" | "NORMAL" | "HIGH" | "HIGHEST";
+    priority?: EventPriority;
+    cancelConditions?: IConditionGroup;
     onExecute(event: any): Promise<void>;
   }): Promise<[any, boolean]>;
 }

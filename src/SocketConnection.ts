@@ -3,7 +3,9 @@ import { WebSocket } from "ws";
 import { WebSocketManager } from "./WebSocketManager";
 
 import util from "util";
-import { buildSingularAPI } from "./api/APIManager";
+import { buildConditionGroup, buildConditions, buildSingularAPI, ICondition, IConditionGroup } from "./api/APIManager";
+
+export type EventPriority = "Lowest" | "Low" | "Normal" | "High" | "Highest" | "Monitor";
 
 export class SocketConnection {
   private pendingResponses: Map<string, (data: any) => void> = new Map();
@@ -67,11 +69,13 @@ export class SocketConnection {
         },
         async registerEvent({
           name,
-          priority = "NORMAL",
+          priority = "Normal",
+          cancelConditions,
           onExecute
         }: {
           name: string;
-          priority?: "LOWEST" | "LOW" | "NORMAL" | "HIGH" | "HIGHEST";
+          priority?: EventPriority;
+          cancelConditions?: IConditionGroup;
           onExecute(event: any): void;
         }) {
           self.eventCbs.set(name, onExecute);
@@ -79,7 +83,8 @@ export class SocketConnection {
             "RegisterEvent",
             {
               name,
-              priority
+              priority,
+              cancelConditions: buildConditionGroup(cancelConditions || {})
             }
           ) as any;
           if (!res.ok) throw res.data;

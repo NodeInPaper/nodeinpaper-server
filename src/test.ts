@@ -51,6 +51,27 @@ nip.register(async ({ api: { $plugin, $class }, onDisconnect, registerCommand, r
     }
   })
 
+  registerEvent({
+    name: "org.bukkit.event.player.PlayerChatEvent",
+    cancelConditions: {
+      and: [
+        {
+          a: true,
+          b: true,
+          op: "=="
+        }
+      ]
+    },
+    async onExecute(event) {
+      const [message] = await event.getMessage().$get();
+      const [isCancelled] = await event.isCancelled().$get();
+      console.log(`chat is cancelled: ${isCancelled}`);
+      console.log(`Message: ${message}`);
+      $plugin.getServer().broadcastMessage(`[Chat] ${message}`).$run();
+      event.$unRef();
+    }
+  })
+
   onDisconnect(() => {
     clearInterval(interval);
   });

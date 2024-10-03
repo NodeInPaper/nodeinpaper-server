@@ -208,6 +208,54 @@ export function buildSingularAPI({
   }, startPath, hardCodedValues)
 }
 
+export interface ICondition {
+  a: string | number | boolean | {
+    base?: "Context" | "Plugin";
+    path: (v: any) => any;
+  };
+  op: "==" | "!=" | ">" | "<" | ">=" | "<=" | "Contains" | "NotContains" | "MatchesRegex" | "NotMatchesRegex";
+  b: string | number | boolean | {
+    base?: "Context" | "Plugin";
+    path: (v: any) => any;
+  };
+}
+
+export interface IConditionGroup {
+  and?: ICondition[];
+  or?: ICondition[];
+}
+
+export function buildConditions(conditions: ICondition[]) {
+  return conditions.map(({ a, op, b }) => {
+    return {
+      a: typeof a === "object" ? {
+        type: "Path",
+        base: a.base || "Context",
+        path: a.path(createInfinitePathProxy(() => ContinueToInfinitePath, []))[CurrentInfinitePath]
+      } : {
+        type: "Value",
+        value: `${a}`
+      },
+      op,
+      b: typeof b === "object" ? {
+        type: "Path",
+        base: b.base || "Context",
+        path: b.path(createInfinitePathProxy(() => ContinueToInfinitePath, []))[CurrentInfinitePath]
+      } : {
+        type: "Value",
+        value: `${b}`
+      }
+    }
+  });
+}
+
+export function buildConditionGroup(group: IConditionGroup) {
+  return {
+    and: group.and ? buildConditions(group.and) : undefined,
+    or: group.or ? buildConditions(group.or) : undefined
+  }
+}
+
 export class APIManager {
   constructor(public nip: NIPServer) { }
 
