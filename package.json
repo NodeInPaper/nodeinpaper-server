@@ -1,6 +1,6 @@
 {
   "name": "nodeinpaper-server",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "NodeInPaper allows you to run node.js code in a Minecraft Java Edition Paper Server",
   "main": "src/index.ts",
   "scripts": {
