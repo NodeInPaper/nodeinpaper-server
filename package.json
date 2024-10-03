@@ -1,6 +1,6 @@
 {
   "name": "nodeinpaper-server",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "NodeInPaper allows you to run node.js code in a Minecraft Java Edition Paper Server",
   "main": "src/index.ts",
   "scripts": {
@@ -26,7 +26,15 @@
     "name": "Kıraç Armağan Önal",
     "email": "kiracarmaganonal@gmail.com"
   },
-  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NodeInPaper/nodeinpaper-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NodeInPaper/nodeinpaper-server/issues"
+  },
+  "homepage": "https://github.com/NodeInPaper/nodeinpaper-server#readme",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@types/node": "^22.7.4",
     "typescript": "^5.6.2",
