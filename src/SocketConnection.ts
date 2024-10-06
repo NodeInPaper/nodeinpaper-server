@@ -160,6 +160,7 @@ export class SocketConnection {
 
   async send(event: string, data: any, responseId?: string) {
     if (this.socket.readyState !== WebSocket.OPEN) return;
+    // console.log("Sending", event, util.inspect(data, { depth: 15, colors: true }));
     this.socket.send(JSON.stringify({ event, data, responseId }));
   }
 }

@@ -1,7 +1,7 @@
 # nodeinpaper-server
 NodeInPaper allows you to run node.js code in a Minecraft Java Edition Paper Server. (this project is still in development)
 
-### current version: 0.0.1
+### current version: 0.0.2
 
 # discord
 development server is [here](https://discord.gg/Gk8yruSrak)

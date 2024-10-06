@@ -5,73 +5,41 @@ const nip = createNIPServer({
   host: "0.0.0.0",
 });
 
-nip.register(async ({ api: { $plugin, $class, $classFromPath }, onDisconnect, registerCommand, registerEvent }) => {
+nip.register(async ({ api: { $plugin, $class, $classFromPath }, onDisconnect, registerCommand, registerEvent, connection }) => {
   console.log("Registered!");
-  let interval = setInterval(async () => {
-    const [onlinePlayers] = await $plugin.getServer().getOnlinePlayers().$get();
-
-    onlinePlayers.forEach(async (player: any) => {
-      const [res] = await player.$get(
-        {
-          uuid: (p: any) => p.getUniqueId().toString(),
-          x: (p: any) => p.getLocation().getX(),
-          y: (p: any) => p.getLocation().getY(),
-          z: (p: any) => p.getLocation().getZ(),
-        }
-      );
-
-      player.sendActionBar(`X: ${res.x.toFixed(2)} Y: ${res.y.toFixed(2)} Z: ${res.z.toFixed(2)}`).$run();
-    });
-  }, 100);
-
-  registerCommand({
-    name: "nodejs-test",
-    async onExecute(sender, label, ...args) {
-      const [playerName] = await sender.getName().$get();
-      console.log("Command executed!");
-      await sender.sendPlainMessage(`Hello from node.js! Your name: ${playerName}`).$run();
-      sender.$unRef();
-    }
-  })
-
-  registerEvent({
-    name: "org.bukkit.event.player.PlayerToggleSneakEvent",
-    async onExecute(event) {
-      const [player] = await event.getPlayer().$get();
-      const [isSneaking] = await event.isSneaking().$get();
-      console.log(`Player ${await player.getName().$get()} is sneaking: ${isSneaking}`);
-      await player.sendPlainMessage(`Sneaking: ${isSneaking}`).$run();
-      event.$unRef();
-    }
-  })
 
   registerEvent({
     name: "org.bukkit.event.player.PlayerChatEvent",
     cancelConditions: {
       and: [
         {
-          a: {
-            base: "Context",
-            path: (c) => c.getMessage()
-          },
-          b: "cancel me",
+          a: true,
+          b: true,
           op: "=="
         }
       ]
     },
+    priority: "Low",
     async onExecute(event) {
-      const [message] = await event.getMessage().$get();
-      const [isCancelled] = await event.isCancelled().$get();
-      console.log(`chat is cancelled: ${isCancelled}`);
-      console.log(`Message: ${message}`);
-      $plugin.getServer().broadcastMessage(`[Chat] ${message}`).$run();
+      const [{ format, message, shouldBypass }] = await event.$get({
+        format: (e: any) => e.getFormat(),
+        message: (e: any) => e.getMessage(),
+        shouldBypass: (e: any) => e.getPlayer().isPermissionSet("aichat.bypass")
+      });
+      const [player] = await event.getPlayer().$get();
       event.$unRef();
+
+      const [papi] = await $class("me.clip.placeholderapi.PlaceholderAPI").$get();
+      // connection.send("LogReference", papi.$refId);
+      // return;
+
+      const [text] = await papi.setPlaceholders(player, "papi test - tps: %server_tps_1%, %player_name%").$get();
+
+      console.log(text);
+      
+      await $plugin.getServer().broadcastMessage(format).$run();
     }
   })
-
-  onDisconnect(() => {
-    clearInterval(interval);
-  });
 });
 
 nip.init();

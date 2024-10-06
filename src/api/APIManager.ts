@@ -30,6 +30,21 @@ export function singularExecute({
   noRef?: boolean
 }) {
   return new Promise(async (resolve, reject) => {
+    path = path.map((key) => {
+      if (key.type === "Apply") {
+        return {
+          ...key,
+          args: key.args!.map((arg: any) => {
+            if (typeof arg === "function" && arg?.$refId) return {
+              __type__: "Reference",
+              id: arg.$refId
+            };
+            return arg;
+          }) as any[]
+        }
+      }
+      return key;
+    });
     const res = (await connection.sendAndWaitResponse("SingularExecute", {
       path,
       sync: isSync,
@@ -104,6 +119,28 @@ export function buildResponseMap(toMap: Record<string, (value: any) => any>): { 
   })
 }
 
+export function formatArgs(args: any[]) {
+  return args.map((arg) => {
+    if (arg?.__type__) return arg;
+    return {
+      type: "Value",
+      value: arg
+    }
+  });
+}
+
+export function formatPath(path: any[]) {
+  return path.map((key) => {
+    if (key?.type === "Apply") {
+      return {
+        key: key.key,
+        type: "Apply",
+        args: formatArgs(key.args)
+      }
+    }
+  });
+}
+
 export function buildSingularAPI({
   connection,
   startPath = [],
@@ -123,8 +160,8 @@ export function buildSingularAPI({
     switch (lastKey.key) {
       case "$execute":
       case "$exec": {
-        if (typeof lastKey.args![0] === "object") {
-          const { sync = false, response = [], noRef = false } = lastKey.args![0];
+        if (typeof lastKey.args![0]?.value === "object") {
+          const { sync = false, response = [], noRef = false } = lastKey.args![0].value;
 
           return singularExecute({
             connection,
@@ -145,8 +182,8 @@ export function buildSingularAPI({
       }
       case "$executeSync":
       case "$execSync": {
-        if (typeof lastKey.args![0] === "object") {
-          const { response = [], noRef = false } = lastKey.args![0];
+        if (typeof lastKey.args![0]?.value === "object") {
+          const { response = [], noRef = false } = lastKey.args![0].value;
           return singularExecute({
             connection,
             path: path.slice(0, -1),
@@ -169,7 +206,7 @@ export function buildSingularAPI({
           connection,
           path: path.slice(0, -1),
           isSync: false,
-          responseMap: buildResponseMap(lastKey.args![0] || {}),
+          responseMap: buildResponseMap(lastKey.args![0]?.value || {}),
           base,
           noRef: false
         });
@@ -179,7 +216,7 @@ export function buildSingularAPI({
           connection,
           path: path.slice(0, -1),
           isSync: true,
-          responseMap: buildResponseMap(lastKey.args![0] || {}),
+          responseMap: buildResponseMap(lastKey.args![0]?.value || {}),
           base,
           noRef: false
         });
